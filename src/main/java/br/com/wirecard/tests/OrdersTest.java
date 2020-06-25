@@ -45,24 +45,9 @@ public class OrdersTest extends BaseTest {
 	
 	@Test
 	public void tokenlessOrder() {
-		
-		Order order = new Order();
-		order.setOwnId(OWNID_ID);
-		
-		Amount amount = new Amount();
-		amount.setCurrency("BRL");
-		amount.setSubtotals(new SubTotals(1500));
-		
-		Item item = new Item("desc", "CLOTHING", 1, "CAMISETA ESTAMPADA", 9500);
-		Item items[] = new Item[1];
-		items[0] = item;
-				
-		order.setAmount(amount);
-		order.setItems(items);
-		order.setCustomer(customer);
-		
+			
 			given()
-				.body(order)
+				.body("")
 			.when()
 				.post("/orders")
 			.then()
@@ -81,6 +66,7 @@ public class OrdersTest extends BaseTest {
 			.when()
 				.post("/orders")
 			.then()
+				.statusCode(400)
 				.body("errors", hasSize(2))
 				.body("errors.code", hasItems("ORD-001", "ORD-010"))
 				.body("errors.path", hasItems("ownId", "items"))
@@ -99,7 +85,7 @@ public class OrdersTest extends BaseTest {
 		amount.setCurrency("BRL");
 		amount.setSubtotals(new SubTotals(1500));
 		
-		Item item = new Item("desc", "CLOTHING", 1, "CAMISETA ESTAMPADA", 9500);
+		Item item = new Item("Camisa", "CLOTHING", 1, "CAMISETA ESTAMPADA", 9500);
 		Item items[] = new Item[1];
 		items[0] = item;
 				
@@ -114,6 +100,14 @@ public class OrdersTest extends BaseTest {
 				.post("/orders")
 			.then()
 				.statusCode(201)
+				.body("id", is(notNullValue()))
+				.body("ownId", is(OWNID_ID))
+				.body("status", is("CREATED"))
+				.body("items.price", hasItems(9500))
+				.body("items.quantity", hasItems(1))
+				.body("items.product", hasItems("Camisa"))
+				.body("items.category", hasItems("CLOTHING"))
+				
 			;
 	}
 	
@@ -258,7 +252,6 @@ public class OrdersTest extends BaseTest {
 				.post("/orders")
 			.then()
 				.statusCode(201)
-				.log().all()
 				.body("items.detail", hasItems(""))
 			;
 	}
